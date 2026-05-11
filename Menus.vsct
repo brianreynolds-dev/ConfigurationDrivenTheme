@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+
+  <Commands package="guidConfigurationThemeSwitcherPackage">
+    <Groups>
+      <Group guid="guidConfigurationThemeSwitcherCommandSet" id="ConfigurationThemeSwitcherToolsGroup" priority="0x0700">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidConfigurationThemeSwitcherCommandSet" id="OpenOptionsCommand" priority="0x0100" type="Button">
+        <Parent guid="guidConfigurationThemeSwitcherCommandSet" id="ConfigurationThemeSwitcherToolsGroup" />
+        <Strings>
+          <ButtonText>Configuration Theme Switcher Options</ButtonText>
+          <CommandName>ConfigurationThemeSwitcher.OpenOptions</CommandName>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="guidConfigurationThemeSwitcherPackage" value="{380dac0a-dfc5-4d81-8d22-974da3cf34fc}" />
+    <GuidSymbol name="guidConfigurationThemeSwitcherCommandSet" value="{b3fbacdd-c6c7-4f9b-a857-cf4ca3d87b7d}">
+      <IDSymbol name="ConfigurationThemeSwitcherToolsGroup" value="0x1020" />
+      <IDSymbol name="OpenOptionsCommand" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

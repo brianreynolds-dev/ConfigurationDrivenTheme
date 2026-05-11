@@ -4,8 +4,9 @@
     <Platform Name="arm64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="ConfigurationDrivenTheme.csproj">
+  <Project Path="ConfigurationThemeSwitcher.csproj" Id="48c1a581-a138-4d10-9203-f5efd02bf409">
     <Platform Solution="*|arm64" Project="arm64" />
     <Platform Solution="*|x86" Project="x86" />
   </Project>
+  <Project Path="tests\ConfigurationThemeSwitcher.Tests\ConfigurationThemeSwitcher.Tests.csproj" />
 </Solution>
