@@ -23,21 +23,21 @@ namespace ConfigurationThemeSwitcher.Services
 
 		public void Info(string message)
 		{
-			Log(__ACTIVITYLOG_ENTRYTYPE.ALE_INFORMATION, message);
+			log(__ACTIVITYLOG_ENTRYTYPE.ALE_INFORMATION, message);
 		}
 
 		public void Warning(string message)
 		{
-			Log(__ACTIVITYLOG_ENTRYTYPE.ALE_WARNING, message);
+			log(__ACTIVITYLOG_ENTRYTYPE.ALE_WARNING, message);
 		}
 
 		public void Error(string message, Exception exception = null)
 		{
 			var text = exception == null ? message : message + Environment.NewLine + exception;
-			Log(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, text);
+			log(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, text);
 		}
 
-		private void Log(__ACTIVITYLOG_ENTRYTYPE entryType, string message)
+		private void log(__ACTIVITYLOG_ENTRYTYPE entryType, string message)
 		{
 			try
 			{
@@ -45,8 +45,7 @@ namespace ConfigurationThemeSwitcher.Services
 				{
 					try
 					{
-						var log = await _package.GetServiceAsync(typeof(SVsActivityLog)).ConfigureAwait(false) as IVsActivityLog;
-						if (log != null)
+						if (await _package.GetServiceAsync(typeof(SVsActivityLog)).ConfigureAwait(false) is IVsActivityLog log)
 						{
 							ErrorHandler.ThrowOnFailure(log.LogEntry((uint)entryType, Source, message ?? string.Empty));
 						}

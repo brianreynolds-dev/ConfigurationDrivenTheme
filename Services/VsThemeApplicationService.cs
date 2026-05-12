@@ -39,8 +39,8 @@ namespace ConfigurationThemeSwitcher.Services
 			try
 			{
 				await _joinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-				var themeService = await GetColorThemeServiceAsync().ConfigureAwait(true);
-				var currentTheme = themeService == null ? null : themeService.CurrentTheme;
+				var themeService = await getColorThemeServiceAsync().ConfigureAwait(true);
+				var currentTheme = themeService?.CurrentTheme;
 				if (currentTheme == null)
 				{
 					return null;
@@ -88,14 +88,14 @@ namespace ConfigurationThemeSwitcher.Services
 			{
 				await _joinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-				var themeService = await GetColorThemeServiceAsync().ConfigureAwait(true);
+				var themeService = await getColorThemeServiceAsync().ConfigureAwait(true);
 				if (themeService == null || themeService.Themes == null)
 				{
 					_activityLog.Warning("Cannot apply theme because Visual Studio color theme service is unavailable.");
 					return;
 				}
 
-				var targetTheme = ResolveTheme(themeService, themeIdOrName);
+				var targetTheme = resolveTheme(themeService, themeIdOrName);
 				if (targetTheme == null)
 				{
 					_activityLog.Warning("Theme '" + themeIdOrName + "' was not found. No theme was applied.");
@@ -134,7 +134,7 @@ namespace ConfigurationThemeSwitcher.Services
 			await ApplyThemeAsync(fallbackTheme, cancellationToken).ConfigureAwait(false);
 		}
 
-		private async Task<IVsColorThemeService> GetColorThemeServiceAsync()
+		private async Task<IVsColorThemeService> getColorThemeServiceAsync()
 		{
 			await _joinableTaskFactory.SwitchToMainThreadAsync();
 			if (_themeCatalog != null)
@@ -145,12 +145,11 @@ namespace ConfigurationThemeSwitcher.Services
 			return await _package.GetServiceAsync(typeof(SVsColorThemeService)).ConfigureAwait(true) as IVsColorThemeService;
 		}
 
-		private static IVsColorTheme ResolveTheme(IVsColorThemeService themeService, string themeIdOrName)
+		private static IVsColorTheme resolveTheme(IVsColorThemeService themeService, string themeIdOrName)
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();
 
-			Guid themeId;
-			if (Guid.TryParse(themeIdOrName, out themeId))
+			if (Guid.TryParse(themeIdOrName, out Guid themeId))
 			{
 				try
 				{

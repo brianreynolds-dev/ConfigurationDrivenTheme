@@ -15,15 +15,15 @@ namespace ConfigurationThemeSwitcher.Services
 {
 	public sealed class VsThemeCatalogService : IThemeCatalogService
 	{
-		private static readonly IReadOnlyList<ThemeInfo> DocumentedFallbackThemes = new[]
-		{
+		private static readonly IReadOnlyList<ThemeInfo> _documentedFallbackThemes =
+		[
 	            // Fallback GUIDs are used only when IVsColorThemeService cannot enumerate themes.
 	            // TODO: Re-verify these identifiers against the current VS 2026 theme service:
 	            // https://learn.microsoft.com/visualstudio/extensibility/migration/modernize-theme-colors
 	            new ThemeInfo("1ded0138-47ce-435e-84ef-9ec1f439b749", "Dark", true),
 			new ThemeInfo("de3dbbcd-f642-433c-8353-8f1df4370aba", "Light", true),
 			new ThemeInfo("a4d6a176-b948-4b29-8c66-53c97a1ed7d0", "Blue", true)
-		};
+		];
 
 		private readonly AsyncPackage _package;
 		private readonly JoinableTaskFactory _joinableTaskFactory;
@@ -46,7 +46,7 @@ namespace ConfigurationThemeSwitcher.Services
 				if (themeService == null || themeService.Themes == null)
 				{
 					_activityLog.Warning("Visual Studio color theme service is unavailable; using documented fallback theme list.");
-					return DocumentedFallbackThemes;
+					return _documentedFallbackThemes;
 				}
 
 				var themes = new List<ThemeInfo>();
@@ -65,7 +65,7 @@ namespace ConfigurationThemeSwitcher.Services
 				if (themes.Count == 0)
 				{
 					_activityLog.Warning("Visual Studio returned no user-visible themes; using documented fallback theme list.");
-					return DocumentedFallbackThemes;
+					return _documentedFallbackThemes;
 				}
 
 				return themes;
@@ -77,7 +77,7 @@ namespace ConfigurationThemeSwitcher.Services
 			catch (Exception ex)
 			{
 				_activityLog.Warning("Unable to enumerate Visual Studio themes; using documented fallback theme list. " + ex.Message);
-				return DocumentedFallbackThemes;
+				return _documentedFallbackThemes;
 			}
 		}
 

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ConfigurationThemeSwitcher.8d5ed720-49a5-4332-8c3d-a2ccea9f0fe2" Version="1.0.5" Language="en-US" Publisher="Brian Reynolds" />
+        <Identity Id="ConfigurationThemeSwitcher.8d5ed720-49a5-4332-8c3d-a2ccea9f0fe2" Version="1.0.6" Language="en-US" Publisher="Brian Reynolds" />
         <DisplayName>Configuration Theme Switcher</DisplayName>
         <Description xml:space="preserve">Automatically switches the active Visual Studio theme based on the active solution configuration.</Description>
         <MoreInfo>https://learn.microsoft.com/visualstudio/extensibility/</MoreInfo>
+        <Tags>Active Configuration, Theme Switcher, Automatic Theme</Tags>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[18.0,19.0)">

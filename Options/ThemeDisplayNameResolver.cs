@@ -12,12 +12,12 @@ namespace ConfigurationThemeSwitcher.Options
 {
 	internal static class ThemeDisplayNameResolver
 	{
-		private static readonly IReadOnlyList<ThemeInfo> FallbackThemes = new[]
-		{
+		private static readonly IReadOnlyList<ThemeInfo> _fallbackThemes =
+		[
 			new ThemeInfo("1ded0138-47ce-435e-84ef-9ec1f439b749", "Dark", true),
 			new ThemeInfo("de3dbbcd-f642-433c-8353-8f1df4370aba", "Light", true),
 			new ThemeInfo("a4d6a176-b948-4b29-8c66-53c97a1ed7d0", "Blue", true)
-		};
+		];
 
 		public static IReadOnlyList<ThemeInfo> GetThemes()
 		{
@@ -25,10 +25,9 @@ namespace ConfigurationThemeSwitcher.Options
 
 			try
 			{
-				var themeService = Package.GetGlobalService(typeof(SVsColorThemeService)) as IVsColorThemeService;
-				if (themeService == null || themeService.Themes == null)
+				if (Package.GetGlobalService(typeof(SVsColorThemeService)) is not IVsColorThemeService themeService || themeService.Themes == null)
 				{
-					return FallbackThemes;
+					return _fallbackThemes;
 				}
 
 				var themes = new List<ThemeInfo>();
@@ -43,11 +42,11 @@ namespace ConfigurationThemeSwitcher.Options
 					themes.Add(new ThemeInfo(theme.ThemeId.ToString("D"), theme.Name, true));
 				}
 
-				return themes.Count == 0 ? FallbackThemes : themes;
+				return themes.Count == 0 ? _fallbackThemes : themes;
 			}
 			catch
 			{
-				return FallbackThemes;
+				return _fallbackThemes;
 			}
 		}
 

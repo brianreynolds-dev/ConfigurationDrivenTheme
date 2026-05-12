@@ -28,7 +28,7 @@ namespace ConfigurationThemeSwitcher.Services
 		{
 			await _joinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-			var page = GetOptionsPage();
+			var page = getOptionsPage();
 			var errors = new List<string>();
 			var mappings = MappingLineParser.Parse(page.ConfigurationThemeMappings, errors);
 			foreach (var error in errors)
@@ -55,7 +55,7 @@ namespace ConfigurationThemeSwitcher.Services
 				return;
 			}
 
-			var page = GetOptionsPage();
+			var page = getOptionsPage();
 			page.EnableExtension = settings.IsEnabled;
 			page.RestoreFallbackThemeWhenUnmapped = settings.RestoreFallbackThemeWhenUnmapped;
 			page.DebounceMilliseconds = settings.DebounceMilliseconds < 0 ? 0 : settings.DebounceMilliseconds;
@@ -64,7 +64,7 @@ namespace ConfigurationThemeSwitcher.Services
 			page.SaveSettingsToStorage();
 		}
 
-		private ConfigurationThemeSwitcherOptionsPage GetOptionsPage()
+		private ConfigurationThemeSwitcherOptionsPage getOptionsPage()
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();
 			return (ConfigurationThemeSwitcherOptionsPage)_package.GetDialogPage(typeof(ConfigurationThemeSwitcherOptionsPage));

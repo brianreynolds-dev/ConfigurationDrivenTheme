@@ -19,21 +19,21 @@ namespace ConfigurationThemeSwitcher
 	[ProvideOptionPage(typeof(ConfigurationThemeSwitcherOptionsPage), "Configuration Theme Switcher", "General", 0, 0, true)]
 	[ProvideProfile(typeof(ConfigurationThemeSwitcherOptionsPage), "Configuration Theme Switcher", "General", 0, 0, true)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
-	[Guid(PackageGuidString)]
+	[Guid(PACKAGE_GUID_STRING)]
 	public sealed class ConfigurationThemeSwitcherPackage : AsyncPackage
 	{
-		public const string PackageGuidString = "380dac0a-dfc5-4d81-8d22-974da3cf34fc";
-		public static readonly Guid CommandSetGuid = new Guid("b3fbacdd-c6c7-4f9b-a857-cf4ca3d87b7d");
-		public const int OpenOptionsCommandId = 0x0100;
+		public const string PACKAGE_GUID_STRING = "380dac0a-dfc5-4d81-8d22-974da3cf34fc";
+		public static readonly Guid CommandSetGuid = new("b3fbacdd-c6c7-4f9b-a857-cf4ca3d87b7d");
+		public const int OPEN_OPTIONS_COMMAND_ID = 0x0100;
 
 		private ConfigurationThemeCoordinator _coordinator;
 		private ConfigurationMonitor _configurationMonitor;
 
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
-			await base.InitializeAsync(cancellationToken, progress);
+			await base.InitializeAsync(cancellationToken, progress).ConfigureAwait(false);
 
-			await RegisterCommandsAsync(cancellationToken);
+			await registerCommandsAsync(cancellationToken).ConfigureAwait(false);
 
 			var activityLog = new ActivityLogService(this);
 			var settingsService = new SettingsService(this, JoinableTaskFactory, activityLog);
@@ -60,7 +60,7 @@ namespace ConfigurationThemeSwitcher
 				JoinableTaskFactory,
 				activityLog);
 
-			await _coordinator.InitializeAsync(cancellationToken);
+			await _coordinator.InitializeAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 		internal void ShowConfigurationThemeSwitcherOptions()
@@ -69,17 +69,13 @@ namespace ConfigurationThemeSwitcher
 			ShowOptionPage(typeof(ConfigurationThemeSwitcherOptionsPage));
 		}
 
-		private async Task RegisterCommandsAsync(CancellationToken cancellationToken)
+		private async Task registerCommandsAsync(CancellationToken cancellationToken)
 		{
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-			var commandService = await GetServiceAsync(typeof(IMenuCommandService)).ConfigureAwait(true) as OleMenuCommandService;
-			if (commandService == null)
-			{
-				return;
-			}
+			if (await GetServiceAsync(typeof(IMenuCommandService)).ConfigureAwait(true) is not OleMenuCommandService commandService) return;
 
-			var commandId = new CommandID(CommandSetGuid, OpenOptionsCommandId);
+			var commandId = new CommandID(CommandSetGuid, OPEN_OPTIONS_COMMAND_ID);
 			var command = new MenuCommand((sender, args) => ShowConfigurationThemeSwitcherOptions(), commandId);
 			commandService.AddCommand(command);
 		}
@@ -88,17 +84,10 @@ namespace ConfigurationThemeSwitcher
 		{
 			if (disposing)
 			{
-				if (_coordinator != null)
-				{
-					_coordinator.Dispose();
-					_coordinator = null;
-				}
-
-				if (_configurationMonitor != null)
-				{
-					_configurationMonitor.Dispose();
-					_configurationMonitor = null;
-				}
+				_coordinator?.Dispose();
+				_coordinator = null;
+				_configurationMonitor?.Dispose();
+				_configurationMonitor = null;
 			}
 
 			base.Dispose(disposing);

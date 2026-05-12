@@ -41,28 +41,28 @@ namespace ConfigurationThemeSwitcher.Services
 		public async Task InitializeAsync(CancellationToken cancellationToken)
 		{
 			await _themeApplicationService.CaptureFallbackThemeAsync(cancellationToken).ConfigureAwait(false);
-			await SeedDefaultMappingsAsync(cancellationToken).ConfigureAwait(false);
+			await seedDefaultMappingsAsync(cancellationToken).ConfigureAwait(false);
 
-			_configurationMonitor.ActiveConfigurationChanged += OnActiveConfigurationChanged;
-			_configurationMonitor.SolutionClosed += OnSolutionClosed;
+			_configurationMonitor.ActiveConfigurationChanged += onActiveConfigurationChanged;
+			_configurationMonitor.SolutionClosed += onSolutionClosed;
 			await _configurationMonitor.StartAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 		public void Dispose()
 		{
-			_configurationMonitor.ActiveConfigurationChanged -= OnActiveConfigurationChanged;
-			_configurationMonitor.SolutionClosed -= OnSolutionClosed;
+			_configurationMonitor.ActiveConfigurationChanged -= onActiveConfigurationChanged;
+			_configurationMonitor.SolutionClosed -= onSolutionClosed;
 		}
 
-		private void OnActiveConfigurationChanged(object sender, ActiveConfigurationChangedEventArgs e)
+		private void onActiveConfigurationChanged(object sender, ActiveConfigurationChangedEventArgs e)
 		{
 			_joinableTaskFactory.RunAsync(async delegate
 			{
-				await ApplyForConfigurationAsync(e.ConfigurationName, CancellationToken.None).ConfigureAwait(false);
+				await applyForConfigurationAsync(e.ConfigurationName, CancellationToken.None).ConfigureAwait(false);
 			}).Task.Forget();
 		}
 
-		private void OnSolutionClosed(object sender, EventArgs e)
+		private void onSolutionClosed(object sender, EventArgs e)
 		{
 			_joinableTaskFactory.RunAsync(async delegate
 			{
@@ -81,7 +81,7 @@ namespace ConfigurationThemeSwitcher.Services
 			}).Task.Forget();
 		}
 
-		private async Task ApplyForConfigurationAsync(string configurationName, CancellationToken cancellationToken)
+		private async Task applyForConfigurationAsync(string configurationName, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -120,7 +120,7 @@ namespace ConfigurationThemeSwitcher.Services
 			}
 		}
 
-		private async Task SeedDefaultMappingsAsync(CancellationToken cancellationToken)
+		private async Task seedDefaultMappingsAsync(CancellationToken cancellationToken)
 		{
 			var settings = await _settingsService.GetSettingsAsync(cancellationToken).ConfigureAwait(false);
 			if (settings.Mappings != null && settings.Mappings.Count > 0)
@@ -139,7 +139,7 @@ namespace ConfigurationThemeSwitcher.Services
 
 			settings.Mappings.Add(new ThemeMapping("Debug", darkTheme == null ? string.Empty : darkTheme.DisplayName));
 			settings.Mappings.Add(new ThemeMapping("Release", lightTheme == null ? string.Empty : lightTheme.DisplayName));
-			settings.Mappings = settings.Mappings.Where(mapping => !string.IsNullOrWhiteSpace(mapping.ThemeId)).ToList();
+			settings.Mappings = [.. settings.Mappings.Where(mapping => !string.IsNullOrWhiteSpace(mapping.ThemeId))];
 
 			if (settings.Mappings.Count > 0)
 			{

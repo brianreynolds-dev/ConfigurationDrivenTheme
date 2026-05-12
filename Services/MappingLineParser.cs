@@ -37,7 +37,7 @@ namespace ConfigurationThemeSwitcher.Services
 
 				if (separatorIndex <= 0 || separatorIndex >= line.Length - separatorLength)
 				{
-					AddError(errors, "Line " + (i + 1) + " must use Configuration=ThemeId.");
+					addError(errors, "Line " + (i + 1) + " must use Configuration=ThemeId.");
 					continue;
 				}
 
@@ -46,13 +46,13 @@ namespace ConfigurationThemeSwitcher.Services
 
 				if (configuration.Length == 0 || theme.Length == 0)
 				{
-					AddError(errors, "Line " + (i + 1) + " must include both a configuration and a theme.");
+					addError(errors, "Line " + (i + 1) + " must include both a configuration and a theme.");
 					continue;
 				}
 
 				if (!seen.Add(configuration))
 				{
-					AddError(errors, "Duplicate configuration mapping: " + configuration + ".");
+					addError(errors, "Duplicate configuration mapping: " + configuration + ".");
 					continue;
 				}
 
@@ -74,12 +74,9 @@ namespace ConfigurationThemeSwitcher.Services
 				.Select(mapping => (mapping.ConfigurationName ?? string.Empty).Trim() + "=" + (mapping.ThemeId ?? string.Empty).Trim()));
 		}
 
-		private static void AddError(IList<string> errors, string error)
+		private static void addError(IList<string> errors, string error)
 		{
-			if (errors != null)
-			{
-				errors.Add(error);
-			}
+			errors?.Add(error);
 		}
 	}
 }
