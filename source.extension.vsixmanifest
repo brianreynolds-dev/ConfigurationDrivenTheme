@@ -13,14 +13,14 @@
         <Tags>Active Configuration, Theme Switcher, Automatic Theme</Tags>
     </Metadata>
     <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[18.0,19.0)">
-            <ProductArchitecture>amd64</ProductArchitecture>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[14.0, 17.0)">
+            <ProductArchitecture>x86</ProductArchitecture>
         </InstallationTarget>
-        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[18.0,19.0)">
-            <ProductArchitecture>amd64</ProductArchitecture>
+        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[14.0, 17.0)">
+            <ProductArchitecture>x86</ProductArchitecture>
         </InstallationTarget>
-        <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[18.0,19.0)">
-            <ProductArchitecture>amd64</ProductArchitecture>
+        <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[14.0, 17.0)">
+            <ProductArchitecture>x86</ProductArchitecture>
         </InstallationTarget>
     </Installation>
     <Dependencies>
