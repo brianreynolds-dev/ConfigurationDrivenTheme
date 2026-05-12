@@ -40,7 +40,7 @@ namespace ConfigurationThemeSwitcher.Tests
 				return Task.CompletedTask;
 			});
 
-			await debouncer.WhenIdleAsync();
+			await debouncer.WhenIdleAsync().ConfigureAwait(false);
 
 			Assert.AreEqual(1, applied);
 			Assert.AreEqual("Benchmark", finalValue);

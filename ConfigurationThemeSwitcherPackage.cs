@@ -31,9 +31,9 @@ namespace ConfigurationThemeSwitcher
 
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
-			await base.InitializeAsync(cancellationToken, progress);
+			await base.InitializeAsync(cancellationToken, progress).ConfigureAwait(false);
 
-			await registerCommandsAsync(cancellationToken);
+			await registerCommandsAsync(cancellationToken).ConfigureAwait(false);
 
 			var activityLog = new ActivityLogService(this);
 			var settingsService = new SettingsService(this, JoinableTaskFactory, activityLog);
@@ -60,7 +60,7 @@ namespace ConfigurationThemeSwitcher
 				JoinableTaskFactory,
 				activityLog);
 
-			await _coordinator.InitializeAsync(cancellationToken);
+			await _coordinator.InitializeAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 		internal void ShowConfigurationThemeSwitcherOptions()
