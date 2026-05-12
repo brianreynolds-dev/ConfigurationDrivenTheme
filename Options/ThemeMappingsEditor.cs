@@ -57,18 +57,18 @@ namespace ConfigurationThemeSwitcher.Options
 				Height = 420;
 				MinimumSize = new Size(560, 320);
 
-				_themes = ThemeDisplayNameResolver.GetThemes().OrderBy(theme => theme.DisplayName).ToList();
+				_themes = [.. ThemeDisplayNameResolver.GetThemes().OrderBy(theme => theme.DisplayName)];
 
-				_grid = CreateGrid(mappingText);
+				_grid = createGrid(mappingText);
 				_addButton = new Button { Text = "Add", AutoSize = true };
 				_removeButton = new Button { Text = "Remove", AutoSize = true };
 				_defaultsButton = new Button { Text = "Reset defaults", AutoSize = true };
 				var okButton = new Button { Text = "OK", DialogResult = DialogResult.OK, AutoSize = true };
 				var cancelButton = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, AutoSize = true };
 
-				_addButton.Click += delegate { _grid.Rows.Add("Debug", FirstThemeName()); };
-				_removeButton.Click += delegate { RemoveSelectedRows(); };
-				_defaultsButton.Click += delegate { ResetDefaults(); };
+				_addButton.Click += delegate { _grid.Rows.Add("Debug", firstThemeName()); };
+				_removeButton.Click += delegate { removeSelectedRows(); };
+				_defaultsButton.Click += delegate { resetDefaults(); };
 
 				AcceptButton = okButton;
 				CancelButton = cancelButton;
@@ -120,7 +120,7 @@ namespace ConfigurationThemeSwitcher.Options
 			{
 				if (DialogResult == DialogResult.OK)
 				{
-					var errors = ValidateRows();
+					var errors = validateRows();
 					if (errors.Any())
 					{
 						MessageBox.Show(this, string.Join(Environment.NewLine, errors), "Invalid mappings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -131,7 +131,7 @@ namespace ConfigurationThemeSwitcher.Options
 				base.OnFormClosing(e);
 			}
 
-			private DataGridView CreateGrid(string mappingText)
+			private DataGridView createGrid(string mappingText)
 			{
 				ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -186,13 +186,13 @@ namespace ConfigurationThemeSwitcher.Options
 
 				if (grid.Rows.Count == 0)
 				{
-					ResetDefaults(grid);
+					resetDefaults(grid);
 				}
 
 				return grid;
 			}
 
-			private void RemoveSelectedRows()
+			private void removeSelectedRows()
 			{
 				foreach (DataGridViewRow row in _grid.SelectedRows.Cast<DataGridViewRow>().Where(row => !row.IsNewRow).ToArray())
 				{
@@ -200,12 +200,12 @@ namespace ConfigurationThemeSwitcher.Options
 				}
 			}
 
-			private void ResetDefaults()
+			private void resetDefaults()
 			{
-				ResetDefaults(_grid);
+				resetDefaults(_grid);
 			}
 
-			private void ResetDefaults(DataGridView grid)
+			private void resetDefaults(DataGridView grid)
 			{
 				grid.Rows.Clear();
 				var darkTheme = _themes.FirstOrDefault(theme => theme.DisplayName.IndexOf("dark", StringComparison.OrdinalIgnoreCase) >= 0);
@@ -222,12 +222,12 @@ namespace ConfigurationThemeSwitcher.Options
 				}
 			}
 
-			private string FirstThemeName()
+			private string firstThemeName()
 			{
 				return _themes.Count == 0 ? string.Empty : _themes[0].DisplayName;
 			}
 
-			private List<string> ValidateRows()
+			private List<string> validateRows()
 			{
 				var errors = new List<string>();
 				var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

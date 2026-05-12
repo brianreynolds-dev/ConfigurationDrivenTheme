@@ -30,8 +30,7 @@ namespace ConfigurationThemeSwitcher.Services
 			{
 				await _joinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-				var dte = await _package.GetServiceAsync(typeof(DTE)).ConfigureAwait(true) as DTE;
-				if (dte == null || dte.Solution == null || !dte.Solution.IsOpen)
+				if (await _package.GetServiceAsync(typeof(DTE)).ConfigureAwait(true) is not DTE dte || dte.Solution == null || !dte.Solution.IsOpen)
 				{
 					return null;
 				}

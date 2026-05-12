@@ -9,7 +9,7 @@ namespace ConfigurationThemeSwitcher.Models
 			IsEnabled = true;
 			RestoreFallbackThemeWhenUnmapped = true;
 			DebounceMilliseconds = 250;
-			Mappings = new List<ThemeMapping>();
+			Mappings = [];
 		}
 
 		public bool IsEnabled { get; set; }

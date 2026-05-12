@@ -59,8 +59,7 @@ namespace ConfigurationThemeSwitcher.Services
 			_solutionBuildManager = await _package.GetServiceAsync(typeof(SVsSolutionBuildManager)).ConfigureAwait(true) as IVsSolutionBuildManager2;
 			if (_solutionBuildManager != null)
 			{
-				uint cookie;
-				var hr = _solutionBuildManager.AdviseUpdateSolutionEvents(this, out cookie);
+				var hr = _solutionBuildManager.AdviseUpdateSolutionEvents(this, out uint cookie);
 				if (ErrorHandler.Succeeded(hr))
 				{
 					_buildEventsCookie = cookie;
@@ -78,8 +77,7 @@ namespace ConfigurationThemeSwitcher.Services
 			_solution = await _package.GetServiceAsync(typeof(SVsSolution)).ConfigureAwait(true) as IVsSolution;
 			if (_solution != null)
 			{
-				uint cookie;
-				var hr = _solution.AdviseSolutionEvents(this, out cookie);
+				var hr = _solution.AdviseSolutionEvents(this, out uint cookie);
 				if (ErrorHandler.Succeeded(hr))
 				{
 					_solutionEventsCookie = cookie;
@@ -94,7 +92,7 @@ namespace ConfigurationThemeSwitcher.Services
 				_activityLog.Warning("SVsSolution is unavailable; solution open/close events may not be detected.");
 			}
 
-			ScheduleConfigurationEvaluation();
+			scheduleConfigurationEvaluation();
 		}
 
 		public void Dispose()
@@ -137,23 +135,19 @@ namespace ConfigurationThemeSwitcher.Services
 		public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
 		{
 			// A null hierarchy means the global solution configuration may have changed.
-			ScheduleConfigurationEvaluation();
+			scheduleConfigurationEvaluation();
 			return VSConstants.S_OK;
 		}
 
 		public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
 		{
-			ScheduleConfigurationEvaluation();
+			scheduleConfigurationEvaluation();
 			return VSConstants.S_OK;
 		}
 
 		public int OnAfterCloseSolution(object pUnkReserved)
 		{
-			var handler = SolutionClosed;
-			if (handler != null)
-			{
-				handler(this, EventArgs.Empty);
-			}
+			SolutionClosed?.Invoke(this, EventArgs.Empty);
 
 			return VSConstants.S_OK;
 		}
@@ -228,7 +222,7 @@ namespace ConfigurationThemeSwitcher.Services
 			return VSConstants.S_OK;
 		}
 
-		private void ScheduleConfigurationEvaluation()
+		private void scheduleConfigurationEvaluation()
 		{
 			_joinableTaskFactory.RunAsync(async delegate
 			{
@@ -240,11 +234,7 @@ namespace ConfigurationThemeSwitcher.Services
 					_debouncer.Schedule(delay, async cancellationToken =>
 					{
 						var configurationName = await _activeConfigurationProvider.GetActiveConfigurationNameAsync(cancellationToken).ConfigureAwait(false);
-						var handler = ActiveConfigurationChanged;
-						if (handler != null)
-						{
-							handler(this, new ActiveConfigurationChangedEventArgs(configurationName));
-						}
+						ActiveConfigurationChanged?.Invoke(this, new ActiveConfigurationChangedEventArgs(configurationName));
 					});
 				}
 				catch (Exception ex)

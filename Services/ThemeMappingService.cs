@@ -21,7 +21,7 @@ namespace ConfigurationThemeSwitcher.Services
 
 			if (exactMatch != null)
 			{
-				return EmptyToNull(exactMatch.ThemeId);
+				return emptyToNull(exactMatch.ThemeId);
 			}
 
 			var normalizedConfiguration = NormalizeConfigurationName(configurationName);
@@ -34,7 +34,7 @@ namespace ConfigurationThemeSwitcher.Services
 				mapping != null &&
 				string.Equals(NormalizeConfigurationName(mapping.ConfigurationName), normalizedConfiguration, StringComparison.OrdinalIgnoreCase));
 
-			return normalizedMatch == null ? null : EmptyToNull(normalizedMatch.ThemeId);
+			return normalizedMatch == null ? null : emptyToNull(normalizedMatch.ThemeId);
 		}
 
 		internal static string NormalizeConfigurationName(string configurationName)
@@ -54,7 +54,7 @@ namespace ConfigurationThemeSwitcher.Services
 			return normalized.Replace(" ", string.Empty).Replace("-", string.Empty).Replace("_", string.Empty);
 		}
 
-		private static string EmptyToNull(string value)
+		private static string emptyToNull(string value)
 		{
 			return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 		}

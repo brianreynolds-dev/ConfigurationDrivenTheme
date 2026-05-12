@@ -16,10 +16,10 @@ namespace ConfigurationThemeSwitcher.Tests
 			var service = new ThemeMappingService();
 			var settings = new ExtensionSettings
 			{
-				Mappings = new List<ThemeMapping>
-				{
+				Mappings =
+				[
 					new ThemeMapping("Debug", "DarkTheme")
-				}
+				]
 			};
 
 			Assert.AreEqual("DarkTheme", service.ResolveThemeId(settings, "Debug"));
@@ -31,10 +31,10 @@ namespace ConfigurationThemeSwitcher.Tests
 			var service = new ThemeMappingService();
 			var settings = new ExtensionSettings
 			{
-				Mappings = new List<ThemeMapping>
-				{
+				Mappings =
+				[
 					new ThemeMapping("Release", "LightTheme")
-				}
+				]
 			};
 
 			Assert.AreEqual("LightTheme", service.ResolveThemeId(settings, "release"));
@@ -46,10 +46,10 @@ namespace ConfigurationThemeSwitcher.Tests
 			var service = new ThemeMappingService();
 			var settings = new ExtensionSettings
 			{
-				Mappings = new List<ThemeMapping>
-				{
+				Mappings =
+				[
 					new ThemeMapping("Benchmark", "BlueTheme")
-				}
+				]
 			};
 
 			Assert.AreEqual("BlueTheme", service.ResolveThemeId(settings, "Benchmark|Any CPU"));
@@ -61,10 +61,10 @@ namespace ConfigurationThemeSwitcher.Tests
 			var service = new ThemeMappingService();
 			var settings = new ExtensionSettings
 			{
-				Mappings = new List<ThemeMapping>
-				{
+				Mappings =
+				[
 					new ThemeMapping("Debug", "DarkTheme")
-				}
+				]
 			};
 
 			Assert.IsNull(service.ResolveThemeId(settings, "Staging"));
@@ -77,7 +77,7 @@ namespace ConfigurationThemeSwitcher.Tests
 			var settings = new ExtensionSettings
 			{
 				IsEnabled = false,
-				Mappings = new List<ThemeMapping>()
+				Mappings = []
 			};
 
 			Assert.IsNull(service.ResolveThemeId(settings, "Debug"));
@@ -89,10 +89,10 @@ namespace ConfigurationThemeSwitcher.Tests
 			var service = new ThemeMappingService();
 			var settings = new ExtensionSettings
 			{
-				Mappings = new List<ThemeMapping>
-				{
+				Mappings =
+				[
 					new ThemeMapping("Debug", " ")
-				}
+				]
 			};
 
 			Assert.IsNull(service.ResolveThemeId(settings, "Debug"));

@@ -8,7 +8,7 @@ namespace ConfigurationThemeSwitcher.Services
 {
 	public sealed class AsyncDebouncer : IDisposable
 	{
-		private readonly object _gate = new object();
+		private readonly object _gate = new();
 		private readonly IActivityLogService _activityLog;
 		private CancellationTokenSource _pendingCancellation;
 		private Task _pendingTask = Task.CompletedTask;
@@ -39,7 +39,7 @@ namespace ConfigurationThemeSwitcher.Services
 				previous = _pendingCancellation;
 				current = new CancellationTokenSource();
 				_pendingCancellation = current;
-				_pendingTask = RunAsync(Math.Max(0, delayMilliseconds), action, current.Token);
+				_pendingTask = runAsync(Math.Max(0, delayMilliseconds), action, current.Token);
 			}
 
 			if (previous != null)
@@ -80,7 +80,7 @@ namespace ConfigurationThemeSwitcher.Services
 			}
 		}
 
-		private async Task RunAsync(int delayMilliseconds, Func<CancellationToken, Task> action, CancellationToken cancellationToken)
+		private async Task runAsync(int delayMilliseconds, Func<CancellationToken, Task> action, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -93,10 +93,7 @@ namespace ConfigurationThemeSwitcher.Services
 			}
 			catch (Exception ex)
 			{
-				if (_activityLog != null)
-				{
-					_activityLog.Error("Debounced configuration operation failed.", ex);
-				}
+				_activityLog?.Error("Debounced configuration operation failed.", ex);
 			}
 		}
 	}
