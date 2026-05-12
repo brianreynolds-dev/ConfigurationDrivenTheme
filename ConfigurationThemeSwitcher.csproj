@@ -73,6 +73,19 @@
     <Compile Include="Services\VsThemeCatalogService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="LICENSE.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="GettingStarted.md">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="ReleaseNotes.md">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Assets\ExtensionIcon.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
