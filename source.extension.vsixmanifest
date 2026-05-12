@@ -5,6 +5,8 @@
         <DisplayName>Configuration Theme Switcher</DisplayName>
         <Description xml:space="preserve">Automatically switches the active Visual Studio theme based on the active solution configuration.</Description>
         <MoreInfo>https://learn.microsoft.com/visualstudio/extensibility/</MoreInfo>
+        <Icon>Assets\ExtensionIcon.png</Icon>
+        <PreviewImage>Assets\ExtensionIcon.png</PreviewImage>
         <Tags>Active Configuration, Theme Switcher, Automatic Theme</Tags>
     </Metadata>
     <Installation>
