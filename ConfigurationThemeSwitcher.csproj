@@ -76,6 +76,9 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Assets\ExtensionIcon.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <VSCTCompile Include="Menus.vsct" />
   </ItemGroup>
   <ItemGroup>
