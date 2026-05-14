@@ -28,6 +28,7 @@ namespace ConfigurationThemeSwitcher
 
 		private ConfigurationThemeCoordinator _coordinator;
 		private ConfigurationMonitor _configurationMonitor;
+		private VsInstanceActivationMonitor _instanceActivationMonitor;
 
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
@@ -42,6 +43,7 @@ namespace ConfigurationThemeSwitcher
 			var mappingService = new ThemeMappingService();
 			var activeConfigurationProvider = new DteActiveConfigurationProvider(this, JoinableTaskFactory, activityLog);
 			var debouncer = new AsyncDebouncer(activityLog);
+			_instanceActivationMonitor = new VsInstanceActivationMonitor(this, JoinableTaskFactory, activityLog);
 
 			_configurationMonitor = new ConfigurationMonitor(
 				this,
@@ -57,6 +59,7 @@ namespace ConfigurationThemeSwitcher
 				themeCatalog,
 				themeApplication,
 				_configurationMonitor,
+				_instanceActivationMonitor,
 				JoinableTaskFactory,
 				activityLog);
 
@@ -88,6 +91,8 @@ namespace ConfigurationThemeSwitcher
 				_coordinator = null;
 				_configurationMonitor?.Dispose();
 				_configurationMonitor = null;
+				_instanceActivationMonitor?.Dispose();
+				_instanceActivationMonitor = null;
 			}
 
 			base.Dispose(disposing);

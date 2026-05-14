@@ -1,4 +1,4 @@
-# Configuration Theme Switcher
+﻿# Configuration Theme Switcher
 
 Configuration Theme Switcher is a Visual Studio 2026 VSIX extension that changes the active Visual Studio theme when the active solution configuration changes. It is intended to make states like Debug, Release, Staging, or Benchmark visually obvious.
 
