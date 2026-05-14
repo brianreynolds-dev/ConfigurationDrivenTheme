@@ -13,5 +13,7 @@ namespace ConfigurationThemeSwitcher.Contracts
 		event EventHandler SolutionClosed;
 
 		Task StartAsync(CancellationToken cancellationToken);
+
+		Task RefreshAsync(CancellationToken cancellationToken);
 	}
 }

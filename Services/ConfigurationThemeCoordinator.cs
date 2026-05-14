@@ -17,8 +17,11 @@ namespace ConfigurationThemeSwitcher.Services
 		private readonly IThemeCatalogService _themeCatalogService;
 		private readonly IThemeApplicationService _themeApplicationService;
 		private readonly IConfigurationMonitor _configurationMonitor;
+		private readonly IInstanceActivationMonitor _instanceActivationMonitor;
 		private readonly JoinableTaskFactory _joinableTaskFactory;
 		private readonly IActivityLogService _activityLog;
+		private readonly object _configurationLock = new object();
+		private string _lastConfigurationName;
 
 		public ConfigurationThemeCoordinator(
 			ISettingsService settingsService,
@@ -26,6 +29,7 @@ namespace ConfigurationThemeSwitcher.Services
 			IThemeCatalogService themeCatalogService,
 			IThemeApplicationService themeApplicationService,
 			IConfigurationMonitor configurationMonitor,
+			IInstanceActivationMonitor instanceActivationMonitor,
 			JoinableTaskFactory joinableTaskFactory,
 			IActivityLogService activityLog)
 		{
@@ -34,6 +38,7 @@ namespace ConfigurationThemeSwitcher.Services
 			_themeCatalogService = themeCatalogService;
 			_themeApplicationService = themeApplicationService;
 			_configurationMonitor = configurationMonitor;
+			_instanceActivationMonitor = instanceActivationMonitor;
 			_joinableTaskFactory = joinableTaskFactory;
 			_activityLog = activityLog;
 		}
@@ -45,6 +50,8 @@ namespace ConfigurationThemeSwitcher.Services
 
 			_configurationMonitor.ActiveConfigurationChanged += onActiveConfigurationChanged;
 			_configurationMonitor.SolutionClosed += onSolutionClosed;
+			_instanceActivationMonitor.Activated += onInstanceActivated;
+			await _instanceActivationMonitor.StartAsync(cancellationToken).ConfigureAwait(false);
 			await _configurationMonitor.StartAsync(cancellationToken).ConfigureAwait(false);
 		}
 
@@ -52,18 +59,54 @@ namespace ConfigurationThemeSwitcher.Services
 		{
 			_configurationMonitor.ActiveConfigurationChanged -= onActiveConfigurationChanged;
 			_configurationMonitor.SolutionClosed -= onSolutionClosed;
+			_instanceActivationMonitor.Activated -= onInstanceActivated;
 		}
 
 		private void onActiveConfigurationChanged(object sender, ActiveConfigurationChangedEventArgs e)
 		{
+			lock (_configurationLock)
+			{
+				_lastConfigurationName = e.ConfigurationName;
+			}
+
+			if (!_instanceActivationMonitor.IsActive)
+			{
+				return;
+			}
+
 			_joinableTaskFactory.RunAsync(async delegate
 			{
 				await applyForConfigurationAsync(e.ConfigurationName, CancellationToken.None).ConfigureAwait(false);
 			}).Task.Forget();
 		}
 
+		private void onInstanceActivated(object sender, EventArgs e)
+		{
+			_joinableTaskFactory.RunAsync(async delegate
+			{
+				var lastKnownConfigurationName = getLastConfigurationName();
+				try
+				{
+					await _configurationMonitor.RefreshAsync(CancellationToken.None).ConfigureAwait(false);
+				}
+				catch (Exception ex)
+				{
+					_activityLog.Error("Failed to refresh active configuration after Visual Studio activation.", ex);
+					if (!string.IsNullOrWhiteSpace(lastKnownConfigurationName))
+					{
+						await applyForConfigurationAsync(lastKnownConfigurationName, CancellationToken.None).ConfigureAwait(false);
+					}
+				}
+			}).Task.Forget();
+		}
+
 		private void onSolutionClosed(object sender, EventArgs e)
 		{
+			if (!_instanceActivationMonitor.IsActive)
+			{
+				return;
+			}
+
 			_joinableTaskFactory.RunAsync(async delegate
 			{
 				try
@@ -117,6 +160,14 @@ namespace ConfigurationThemeSwitcher.Services
 			catch (Exception ex)
 			{
 				_activityLog.Error("Failed to apply theme for active configuration '" + (configurationName ?? "<none>") + "'.", ex);
+			}
+		}
+
+		private string getLastConfigurationName()
+		{
+			lock (_configurationLock)
+			{
+				return _lastConfigurationName;
 			}
 		}
 

@@ -95,6 +95,12 @@ namespace ConfigurationThemeSwitcher.Services
 			scheduleConfigurationEvaluation();
 		}
 
+		public async Task RefreshAsync(CancellationToken cancellationToken)
+		{
+			var configurationName = await _activeConfigurationProvider.GetActiveConfigurationNameAsync(cancellationToken).ConfigureAwait(false);
+			ActiveConfigurationChanged?.Invoke(this, new ActiveConfigurationChangedEventArgs(configurationName));
+		}
+
 		public void Dispose()
 		{
 			_joinableTaskFactory.RunAsync(async delegate
@@ -233,8 +239,7 @@ namespace ConfigurationThemeSwitcher.Services
 
 					_debouncer.Schedule(delay, async cancellationToken =>
 					{
-						var configurationName = await _activeConfigurationProvider.GetActiveConfigurationNameAsync(cancellationToken).ConfigureAwait(false);
-						ActiveConfigurationChanged?.Invoke(this, new ActiveConfigurationChangedEventArgs(configurationName));
+						await RefreshAsync(cancellationToken).ConfigureAwait(false);
 					});
 				}
 				catch (Exception ex)
