@@ -22,7 +22,7 @@ namespace ConfigurationThemeSwitcher.Tests
 				]
 			};
 
-			Assert.AreEqual("DarkTheme", service.ResolveThemeId(settings, "Debug"));
+			Assert.AreEqual("DarkTheme", service.ResolveThemeId(settings, "Debug", false));
 		}
 
 		[TestMethod]
@@ -37,7 +37,7 @@ namespace ConfigurationThemeSwitcher.Tests
 				]
 			};
 
-			Assert.AreEqual("LightTheme", service.ResolveThemeId(settings, "release"));
+			Assert.AreEqual("LightTheme", service.ResolveThemeId(settings, "release", false));
 		}
 
 		[TestMethod]
@@ -52,7 +52,7 @@ namespace ConfigurationThemeSwitcher.Tests
 				]
 			};
 
-			Assert.AreEqual("BlueTheme", service.ResolveThemeId(settings, "Benchmark|Any CPU"));
+			Assert.AreEqual("BlueTheme", service.ResolveThemeId(settings, "Benchmark|Any CPU", false));
 		}
 
 		[TestMethod]
@@ -67,7 +67,7 @@ namespace ConfigurationThemeSwitcher.Tests
 				]
 			};
 
-			Assert.IsNull(service.ResolveThemeId(settings, "Staging"));
+			Assert.IsNull(service.ResolveThemeId(settings, "Staging", false));
 		}
 
 		[TestMethod]
@@ -80,7 +80,7 @@ namespace ConfigurationThemeSwitcher.Tests
 				Mappings = []
 			};
 
-			Assert.IsNull(service.ResolveThemeId(settings, "Debug"));
+			Assert.IsNull(service.ResolveThemeId(settings, "Debug", false));
 		}
 
 		[TestMethod]
@@ -95,7 +95,73 @@ namespace ConfigurationThemeSwitcher.Tests
 				]
 			};
 
-			Assert.IsNull(service.ResolveThemeId(settings, "Debug"));
+			Assert.IsNull(service.ResolveThemeId(settings, "Debug", false));
+		}
+
+		[TestMethod]
+		public void ResolveThemeId_UsesExplicitDebuggingThemeWhileDebugging()
+		{
+			var service = new ThemeMappingService();
+			var settings = new ExtensionSettings
+			{
+				DebuggingThemeId = "DebuggingTheme",
+				Mappings =
+				[
+					new ThemeMapping("Debug", "DarkTheme"),
+					new ThemeMapping("Release", "LightTheme")
+				]
+			};
+
+			Assert.AreEqual("DebuggingTheme", service.ResolveThemeId(settings, "Release", true));
+		}
+
+		[TestMethod]
+		public void ResolveThemeId_UsesDebugMappingWhileDebuggingWhenDebuggingThemeIsBlank()
+		{
+			var service = new ThemeMappingService();
+			var settings = new ExtensionSettings
+			{
+				DebuggingThemeId = " ",
+				Mappings =
+				[
+					new ThemeMapping("Debug", "DarkTheme"),
+					new ThemeMapping("Release", "LightTheme")
+				]
+			};
+
+			Assert.AreEqual("DarkTheme", service.ResolveThemeId(settings, "Release", true));
+		}
+
+		[TestMethod]
+		public void ResolveThemeId_ReturnsNullWhileDebuggingWhenDebuggingAndDebugMappingsAreMissing()
+		{
+			var service = new ThemeMappingService();
+			var settings = new ExtensionSettings
+			{
+				Mappings =
+				[
+					new ThemeMapping("Release", "LightTheme")
+				]
+			};
+
+			Assert.IsNull(service.ResolveThemeId(settings, "Release", true));
+		}
+
+		[TestMethod]
+		public void ResolveThemeId_UsesActiveConfigurationWhenNotDebugging()
+		{
+			var service = new ThemeMappingService();
+			var settings = new ExtensionSettings
+			{
+				DebuggingThemeId = "DebuggingTheme",
+				Mappings =
+				[
+					new ThemeMapping("Debug", "DarkTheme"),
+					new ThemeMapping("Release", "LightTheme")
+				]
+			};
+
+			Assert.AreEqual("LightTheme", service.ResolveThemeId(settings, "Release", false));
 		}
 	}
 }

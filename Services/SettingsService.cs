@@ -42,6 +42,7 @@ namespace ConfigurationThemeSwitcher.Services
 				RestoreFallbackThemeWhenUnmapped = page.RestoreFallbackThemeWhenUnmapped,
 				DebounceMilliseconds = page.DebounceMilliseconds < 0 ? 0 : page.DebounceMilliseconds,
 				FallbackThemeId = page.FallbackThemeId,
+				DebuggingThemeId = page.DebuggingThemeId,
 				Mappings = mappings
 			};
 		}
@@ -60,6 +61,7 @@ namespace ConfigurationThemeSwitcher.Services
 			page.RestoreFallbackThemeWhenUnmapped = settings.RestoreFallbackThemeWhenUnmapped;
 			page.DebounceMilliseconds = settings.DebounceMilliseconds < 0 ? 0 : settings.DebounceMilliseconds;
 			page.FallbackThemeId = settings.FallbackThemeId ?? string.Empty;
+			page.DebuggingThemeId = settings.DebuggingThemeId ?? string.Empty;
 			page.ConfigurationThemeMappings = MappingLineParser.Format(settings.Mappings);
 			page.SaveSettingsToStorage();
 		}

@@ -160,6 +160,7 @@ namespace ConfigurationThemeSwitcher.Options
 				{
 					HeaderText = "Theme",
 					FillWeight = 55,
+					DisplayStyle = DataGridViewComboBoxDisplayStyle.DropDownButton,
 					FlatStyle = FlatStyle.System,
 					SortMode = DataGridViewColumnSortMode.NotSortable
 				};
@@ -170,6 +171,7 @@ namespace ConfigurationThemeSwitcher.Options
 				}
 
 				grid.Columns.Add(themeColumn);
+				grid.EditingControlShowing += onEditingControlShowing;
 
 				var errors = new List<string>();
 				var mappings = MappingLineParser.Parse(mappingText, errors);
@@ -190,6 +192,14 @@ namespace ConfigurationThemeSwitcher.Options
 				}
 
 				return grid;
+			}
+
+			private static void onEditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+			{
+				if (e.Control is ComboBox comboBox)
+				{
+					comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+				}
 			}
 
 			private void removeSelectedRows()

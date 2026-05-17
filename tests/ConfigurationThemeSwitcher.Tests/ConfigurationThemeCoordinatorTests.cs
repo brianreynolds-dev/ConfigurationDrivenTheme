@@ -77,12 +77,108 @@ namespace ConfigurationThemeSwitcher.Tests
 			Assert.AreEqual(1, testContext.ThemeApplication.RestoreFallbackCount);
 		}
 
-		private static CoordinatorTestContext createCoordinator(bool isActive)
+		[TestMethod]
+		public async Task DebuggingStateChanged_AppliesDebuggingThemeWhenEnteringRunMode()
+		{
+			var settings = createSettings();
+			settings.DebuggingThemeId = "Debugging";
+			var testContext = createCoordinator(isActive: true, settings: settings);
+			await testContext.Coordinator.InitializeAsync(CancellationToken.None).ConfigureAwait(false);
+
+			testContext.ConfigurationMonitor.RaiseConfigurationChanged("Release");
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(1).ConfigureAwait(false);
+			testContext.DebuggerStateMonitor.EnterRunMode();
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(2).ConfigureAwait(false);
+
+			Assert.AreEqual("Debugging", testContext.ThemeApplication.AppliedThemes[1]);
+		}
+
+		[TestMethod]
+		public async Task DebuggingStateChanged_AppliesDebuggingThemeWhenEnteringBreakMode()
+		{
+			var settings = createSettings();
+			settings.DebuggingThemeId = "Debugging";
+			var testContext = createCoordinator(isActive: true, settings: settings);
+			await testContext.Coordinator.InitializeAsync(CancellationToken.None).ConfigureAwait(false);
+
+			testContext.ConfigurationMonitor.RaiseConfigurationChanged("Release");
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(1).ConfigureAwait(false);
+			testContext.DebuggerStateMonitor.EnterBreakMode();
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(2).ConfigureAwait(false);
+
+			Assert.AreEqual("Debugging", testContext.ThemeApplication.AppliedThemes[1]);
+		}
+
+		[TestMethod]
+		public async Task DebuggingStateChanged_ReturningToDesignModeAppliesActiveConfigurationTheme()
+		{
+			var settings = createSettings();
+			settings.DebuggingThemeId = "Debugging";
+			var testContext = createCoordinator(isActive: true, settings: settings);
+			await testContext.Coordinator.InitializeAsync(CancellationToken.None).ConfigureAwait(false);
+
+			testContext.ConfigurationMonitor.RaiseConfigurationChanged("Release");
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(1).ConfigureAwait(false);
+			testContext.DebuggerStateMonitor.EnterRunMode();
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(2).ConfigureAwait(false);
+			testContext.DebuggerStateMonitor.EnterDesignMode();
+			await testContext.ThemeApplication.WaitForAppliedThemeCountAsync(3).ConfigureAwait(false);
+
+			Assert.AreEqual("Light", testContext.ThemeApplication.AppliedThemes[2]);
+		}
+
+		[TestMethod]
+		public async Task DebuggingStateChanged_DoesNotApplyThemeWhenInstanceIsInactive()
+		{
+			var settings = createSettings();
+			settings.DebuggingThemeId = "Debugging";
+			var testContext = createCoordinator(isActive: false, settings: settings);
+			await testContext.Coordinator.InitializeAsync(CancellationToken.None).ConfigureAwait(false);
+
+			testContext.ConfigurationMonitor.RaiseConfigurationChanged("Release");
+			testContext.DebuggerStateMonitor.EnterRunMode();
+			await Task.Delay(100).ConfigureAwait(false);
+
+			Assert.AreEqual(0, testContext.ThemeApplication.AppliedThemes.Count);
+		}
+
+		private static CoordinatorTestContext createCoordinator(bool isActive, ExtensionSettings settings = null)
 		{
 			#pragma warning disable VSSDK005 // Unit tests run outside the VS shell and need an isolated context.
 			var joinableTaskContext = new JoinableTaskContext();
 			#pragma warning restore VSSDK005
-			var settings = new ExtensionSettings
+			settings = settings ?? createSettings();
+
+			var settingsService = new TestSettingsService(settings);
+			var mappingService = new ThemeMappingService();
+			var themeCatalog = new TestThemeCatalogService();
+			var themeApplication = new TestThemeApplicationService();
+			var configurationMonitor = new TestConfigurationMonitor();
+			var debuggerStateMonitor = new TestDebuggerStateMonitor();
+			var activationMonitor = new TestInstanceActivationMonitor(isActive);
+			var activityLog = new TestActivityLogService();
+			var coordinator = new ConfigurationThemeCoordinator(
+				settingsService,
+				mappingService,
+				themeCatalog,
+				themeApplication,
+				configurationMonitor,
+				debuggerStateMonitor,
+				activationMonitor,
+				joinableTaskContext.Factory,
+				activityLog);
+
+			return new CoordinatorTestContext(
+				coordinator,
+				configurationMonitor,
+				debuggerStateMonitor,
+				activationMonitor,
+				themeApplication);
+		}
+
+		private static ExtensionSettings createSettings()
+		{
+			return new ExtensionSettings
 			{
 				IsEnabled = true,
 				RestoreFallbackThemeWhenUnmapped = true,
@@ -92,29 +188,6 @@ namespace ConfigurationThemeSwitcher.Tests
 					new ThemeMapping("Release", "Light")
 				]
 			};
-
-			var settingsService = new TestSettingsService(settings);
-			var mappingService = new ThemeMappingService();
-			var themeCatalog = new TestThemeCatalogService();
-			var themeApplication = new TestThemeApplicationService();
-			var configurationMonitor = new TestConfigurationMonitor();
-			var activationMonitor = new TestInstanceActivationMonitor(isActive);
-			var activityLog = new TestActivityLogService();
-			var coordinator = new ConfigurationThemeCoordinator(
-				settingsService,
-				mappingService,
-				themeCatalog,
-				themeApplication,
-				configurationMonitor,
-				activationMonitor,
-				joinableTaskContext.Factory,
-				activityLog);
-
-			return new CoordinatorTestContext(
-				coordinator,
-				configurationMonitor,
-				activationMonitor,
-				themeApplication);
 		}
 
 		private sealed class CoordinatorTestContext
@@ -122,11 +195,13 @@ namespace ConfigurationThemeSwitcher.Tests
 			public CoordinatorTestContext(
 				ConfigurationThemeCoordinator coordinator,
 				TestConfigurationMonitor configurationMonitor,
+				TestDebuggerStateMonitor debuggerStateMonitor,
 				TestInstanceActivationMonitor activationMonitor,
 				TestThemeApplicationService themeApplication)
 			{
 				Coordinator = coordinator;
 				ConfigurationMonitor = configurationMonitor;
+				DebuggerStateMonitor = debuggerStateMonitor;
 				ActivationMonitor = activationMonitor;
 				ThemeApplication = themeApplication;
 			}
@@ -134,6 +209,8 @@ namespace ConfigurationThemeSwitcher.Tests
 			public ConfigurationThemeCoordinator Coordinator { get; }
 
 			public TestConfigurationMonitor ConfigurationMonitor { get; }
+
+			public TestDebuggerStateMonitor DebuggerStateMonitor { get; }
 
 			public TestInstanceActivationMonitor ActivationMonitor { get; }
 
@@ -175,6 +252,51 @@ namespace ConfigurationThemeSwitcher.Tests
 			public void RaiseSolutionClosed()
 			{
 				SolutionClosed?.Invoke(this, EventArgs.Empty);
+			}
+		}
+
+		private sealed class TestDebuggerStateMonitor : IDebuggerStateMonitor
+		{
+			public event EventHandler<DebuggingStateChangedEventArgs> DebuggingStateChanged;
+
+			public bool IsDebugging { get; private set; }
+
+			public int RefreshCount { get; private set; }
+
+			public Task StartAsync(CancellationToken cancellationToken)
+			{
+				return Task.CompletedTask;
+			}
+
+			public Task RefreshAsync(CancellationToken cancellationToken)
+			{
+				RefreshCount++;
+				return Task.CompletedTask;
+			}
+
+			public void Dispose()
+			{
+			}
+
+			public void EnterRunMode()
+			{
+				RaiseDebuggingStateChanged(true);
+			}
+
+			public void EnterBreakMode()
+			{
+				RaiseDebuggingStateChanged(true);
+			}
+
+			public void EnterDesignMode()
+			{
+				RaiseDebuggingStateChanged(false);
+			}
+
+			private void RaiseDebuggingStateChanged(bool isDebugging)
+			{
+				IsDebugging = isDebugging;
+				DebuggingStateChanged?.Invoke(this, new DebuggingStateChangedEventArgs(isDebugging));
 			}
 		}
 
@@ -307,6 +429,22 @@ namespace ConfigurationThemeSwitcher.Tests
 				}
 
 				await _fallbackRestore.Task.ConfigureAwait(false);
+				#pragma warning restore VSTHRD003
+			}
+
+			public async Task WaitForAppliedThemeCountAsync(int expectedCount)
+			{
+				#pragma warning disable VSTHRD003 // Test synchronization waits until background coordinator work records expected calls.
+				var deadline = DateTime.UtcNow.AddSeconds(2);
+				while (AppliedThemes.Count < expectedCount && DateTime.UtcNow < deadline)
+				{
+					await Task.Delay(10).ConfigureAwait(false);
+				}
+
+				if (AppliedThemes.Count < expectedCount)
+				{
+					throw new TimeoutException("Timed out waiting for " + expectedCount + " applied theme calls.");
+				}
 				#pragma warning restore VSTHRD003
 			}
 

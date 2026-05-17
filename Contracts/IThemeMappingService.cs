@@ -4,6 +4,6 @@ namespace ConfigurationThemeSwitcher.Contracts
 {
 	public interface IThemeMappingService
 	{
-		string ResolveThemeId(ExtensionSettings settings, string configurationName);
+		string ResolveThemeId(ExtensionSettings settings, string configurationName, bool isDebugging);
 	}
 }

@@ -9,6 +9,7 @@ namespace ConfigurationThemeSwitcher.Models
 			IsEnabled = true;
 			RestoreFallbackThemeWhenUnmapped = true;
 			DebounceMilliseconds = 250;
+			DebuggingThemeId = string.Empty;
 			Mappings = [];
 		}
 
@@ -19,6 +20,8 @@ namespace ConfigurationThemeSwitcher.Models
 		public int DebounceMilliseconds { get; set; }
 
 		public string FallbackThemeId { get; set; }
+
+		public string DebuggingThemeId { get; set; }
 
 		public List<ThemeMapping> Mappings { get; set; }
 	}
