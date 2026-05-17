@@ -17,6 +17,7 @@ namespace ConfigurationThemeSwitcher.Services
 		private readonly IThemeCatalogService _themeCatalogService;
 		private readonly IThemeApplicationService _themeApplicationService;
 		private readonly IConfigurationMonitor _configurationMonitor;
+		private readonly IDebuggerStateMonitor _debuggerStateMonitor;
 		private readonly IInstanceActivationMonitor _instanceActivationMonitor;
 		private readonly JoinableTaskFactory _joinableTaskFactory;
 		private readonly IActivityLogService _activityLog;
@@ -29,6 +30,7 @@ namespace ConfigurationThemeSwitcher.Services
 			IThemeCatalogService themeCatalogService,
 			IThemeApplicationService themeApplicationService,
 			IConfigurationMonitor configurationMonitor,
+			IDebuggerStateMonitor debuggerStateMonitor,
 			IInstanceActivationMonitor instanceActivationMonitor,
 			JoinableTaskFactory joinableTaskFactory,
 			IActivityLogService activityLog)
@@ -38,6 +40,7 @@ namespace ConfigurationThemeSwitcher.Services
 			_themeCatalogService = themeCatalogService;
 			_themeApplicationService = themeApplicationService;
 			_configurationMonitor = configurationMonitor;
+			_debuggerStateMonitor = debuggerStateMonitor;
 			_instanceActivationMonitor = instanceActivationMonitor;
 			_joinableTaskFactory = joinableTaskFactory;
 			_activityLog = activityLog;
@@ -50,8 +53,10 @@ namespace ConfigurationThemeSwitcher.Services
 
 			_configurationMonitor.ActiveConfigurationChanged += onActiveConfigurationChanged;
 			_configurationMonitor.SolutionClosed += onSolutionClosed;
+			_debuggerStateMonitor.DebuggingStateChanged += onDebuggingStateChanged;
 			_instanceActivationMonitor.Activated += onInstanceActivated;
 			await _instanceActivationMonitor.StartAsync(cancellationToken).ConfigureAwait(false);
+			await _debuggerStateMonitor.StartAsync(cancellationToken).ConfigureAwait(false);
 			await _configurationMonitor.StartAsync(cancellationToken).ConfigureAwait(false);
 		}
 
@@ -59,6 +64,7 @@ namespace ConfigurationThemeSwitcher.Services
 		{
 			_configurationMonitor.ActiveConfigurationChanged -= onActiveConfigurationChanged;
 			_configurationMonitor.SolutionClosed -= onSolutionClosed;
+			_debuggerStateMonitor.DebuggingStateChanged -= onDebuggingStateChanged;
 			_instanceActivationMonitor.Activated -= onInstanceActivated;
 		}
 
@@ -76,7 +82,20 @@ namespace ConfigurationThemeSwitcher.Services
 
 			_joinableTaskFactory.RunAsync(async delegate
 			{
-				await applyForConfigurationAsync(e.ConfigurationName, CancellationToken.None).ConfigureAwait(false);
+				await applyForConfigurationAsync(e.ConfigurationName, _debuggerStateMonitor.IsDebugging, CancellationToken.None).ConfigureAwait(false);
+			}).Task.Forget();
+		}
+
+		private void onDebuggingStateChanged(object sender, DebuggingStateChangedEventArgs e)
+		{
+			if (!_instanceActivationMonitor.IsActive)
+			{
+				return;
+			}
+
+			_joinableTaskFactory.RunAsync(async delegate
+			{
+				await applyForConfigurationAsync(getLastConfigurationName(), e.IsDebugging, CancellationToken.None).ConfigureAwait(false);
 			}).Task.Forget();
 		}
 
@@ -87,6 +106,7 @@ namespace ConfigurationThemeSwitcher.Services
 				var lastKnownConfigurationName = getLastConfigurationName();
 				try
 				{
+					await _debuggerStateMonitor.RefreshAsync(CancellationToken.None).ConfigureAwait(false);
 					await _configurationMonitor.RefreshAsync(CancellationToken.None).ConfigureAwait(false);
 				}
 				catch (Exception ex)
@@ -94,7 +114,7 @@ namespace ConfigurationThemeSwitcher.Services
 					_activityLog.Error("Failed to refresh active configuration after Visual Studio activation.", ex);
 					if (!string.IsNullOrWhiteSpace(lastKnownConfigurationName))
 					{
-						await applyForConfigurationAsync(lastKnownConfigurationName, CancellationToken.None).ConfigureAwait(false);
+						await applyForConfigurationAsync(lastKnownConfigurationName, _debuggerStateMonitor.IsDebugging, CancellationToken.None).ConfigureAwait(false);
 					}
 				}
 			}).Task.Forget();
@@ -124,7 +144,7 @@ namespace ConfigurationThemeSwitcher.Services
 			}).Task.Forget();
 		}
 
-		private async Task applyForConfigurationAsync(string configurationName, CancellationToken cancellationToken)
+		private async Task applyForConfigurationAsync(string configurationName, bool isDebugging, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -134,13 +154,13 @@ namespace ConfigurationThemeSwitcher.Services
 					return;
 				}
 
-				var themeId = _mappingService.ResolveThemeId(settings, configurationName);
+				var themeId = _mappingService.ResolveThemeId(settings, configurationName, isDebugging);
 				if (!string.IsNullOrWhiteSpace(themeId))
 				{
 					var theme = await _themeCatalogService.FindThemeAsync(themeId, cancellationToken).ConfigureAwait(false);
 					if (theme == null)
 					{
-						_activityLog.Warning("Mapped theme '" + themeId + "' for configuration '" + (configurationName ?? "<none>") + "' was not found.");
+						_activityLog.Warning("Mapped theme '" + themeId + "' for " + (isDebugging ? "debugging" : "configuration '" + (configurationName ?? "<none>") + "'") + " was not found.");
 						return;
 					}
 
@@ -159,7 +179,7 @@ namespace ConfigurationThemeSwitcher.Services
 			}
 			catch (Exception ex)
 			{
-				_activityLog.Error("Failed to apply theme for active configuration '" + (configurationName ?? "<none>") + "'.", ex);
+				_activityLog.Error("Failed to apply theme for active configuration '" + (configurationName ?? "<none>") + "'" + (isDebugging ? " while debugging" : string.Empty) + ".", ex);
 			}
 		}
 

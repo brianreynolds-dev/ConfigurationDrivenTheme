@@ -1,5 +1,11 @@
 # Release Notes
 
+## 1.0.2
+- Added a monitor for the debugger state, so theme changes apply while the Visual Studio debugger is running or paused.
+
+## 1.0.1
+- Added a monitor for the active Visual Studio instance, so theme changes apply immediately when the user switches between multiple open instances with different active solutions and configurations.
+
 ## 1.0.0
 
 - Added a dedicated extension icon and preview image for the VSIX listing.

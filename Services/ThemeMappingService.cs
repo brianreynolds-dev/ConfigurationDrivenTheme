@@ -8,9 +8,25 @@ namespace ConfigurationThemeSwitcher.Services
 {
 	public sealed class ThemeMappingService : IThemeMappingService
 	{
-		public string ResolveThemeId(ExtensionSettings settings, string configurationName)
+		public string ResolveThemeId(ExtensionSettings settings, string configurationName, bool isDebugging)
 		{
-			if (settings == null || settings.Mappings == null || string.IsNullOrWhiteSpace(configurationName))
+			if (settings == null)
+			{
+				return null;
+			}
+
+			if (isDebugging)
+			{
+				var debuggingThemeId = emptyToNull(settings.DebuggingThemeId);
+				return debuggingThemeId ?? resolveFromMappings(settings, "Debug");
+			}
+
+			return resolveFromMappings(settings, configurationName);
+		}
+
+		private static string resolveFromMappings(ExtensionSettings settings, string configurationName)
+		{
+			if (settings.Mappings == null || string.IsNullOrWhiteSpace(configurationName))
 			{
 				return null;
 			}

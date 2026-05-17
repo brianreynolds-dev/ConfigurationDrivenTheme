@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ConfigurationThemeSwitcher.8d5ed720-49a5-4332-8c3d-a2ccea9f0fe2" Version="1.0.1" Language="en-US" Publisher="Brian Reynolds" />
+        <Identity Id="ConfigurationThemeSwitcher.8d5ed720-49a5-4332-8c3d-a2ccea9f0fe2" Version="1.0.2" Language="en-US" Publisher="Brian Reynolds" />
         <DisplayName>Configuration Theme Switcher</DisplayName>
         <Description xml:space="preserve">Automatically switches Visual Studio themes when solution configurations change, making Debug, Release, and custom states easy to spot with configurable mappings and fallback theme restore.</Description>
         <MoreInfo>https://learn.microsoft.com/visualstudio/extensibility/</MoreInfo>

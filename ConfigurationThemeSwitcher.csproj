@@ -52,6 +52,7 @@
     <Compile Include="Contracts\IActiveConfigurationProvider.cs" />
     <Compile Include="Contracts\IActivityLogService.cs" />
     <Compile Include="Contracts\IConfigurationMonitor.cs" />
+    <Compile Include="Contracts\IDebuggerStateMonitor.cs" />
     <Compile Include="Contracts\IInstanceActivationMonitor.cs" />
     <Compile Include="Contracts\ISettingsService.cs" />
     <Compile Include="Contracts\IThemeApplicationService.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Services\MappingLineParser.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Services\ThemeMappingService.cs" />
+    <Compile Include="Services\VsDebuggerStateMonitor.cs" />
     <Compile Include="Services\VsInstanceActivationMonitor.cs" />
     <Compile Include="Services\VsThemeApplicationService.cs" />
     <Compile Include="Services\VsThemeCatalogService.cs" />

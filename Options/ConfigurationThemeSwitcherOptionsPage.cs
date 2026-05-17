@@ -21,6 +21,7 @@ namespace ConfigurationThemeSwitcher.Options
 			RestoreFallbackThemeWhenUnmapped = true;
 			DebounceMilliseconds = 250;
 			FallbackThemeId = string.Empty;
+			DebuggingThemeId = string.Empty;
 			ConfigurationThemeMappings = string.Empty;
 		}
 
@@ -45,6 +46,11 @@ namespace ConfigurationThemeSwitcher.Options
 		public string FallbackThemeId { get; set; }
 
 		[Category("Themes")]
+		[DisplayName("Debugging theme")]
+		[Description("Theme display name or ID to apply while the Visual Studio debugger is running or paused. Leave blank to use the Debug mapping, then the fallback/default theme.")]
+		public string DebuggingThemeId { get; set; }
+
+		[Category("Themes")]
 		[DisplayName("Configuration-to-theme mappings")]
 		[Description("One mapping per line, for example Debug=Dark or Release=Juicy Red. Use the editor button to choose themes by display name.")]
 		[Editor(typeof(ThemeMappingsEditor), typeof(UITypeEditor))]
@@ -55,6 +61,7 @@ namespace ConfigurationThemeSwitcher.Options
 			ThreadHelper.ThrowIfNotOnUIThread();
 			base.LoadSettingsFromStorage();
 			FallbackThemeId = ThemeDisplayNameResolver.ToDisplayName(FallbackThemeId);
+			DebuggingThemeId = ThemeDisplayNameResolver.ToDisplayName(DebuggingThemeId);
 			ConfigurationThemeMappings = ThemeDisplayNameResolver.NormalizeMappingsForDisplay(ConfigurationThemeMappings);
 		}
 
@@ -62,6 +69,7 @@ namespace ConfigurationThemeSwitcher.Options
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();
 			FallbackThemeId = ThemeDisplayNameResolver.ToDisplayName(FallbackThemeId);
+			DebuggingThemeId = ThemeDisplayNameResolver.ToDisplayName(DebuggingThemeId);
 			ConfigurationThemeMappings = ThemeDisplayNameResolver.NormalizeMappingsForDisplay(ConfigurationThemeMappings);
 
 			var errors = new List<string>();
