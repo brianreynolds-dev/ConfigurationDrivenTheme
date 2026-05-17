@@ -42,17 +42,19 @@ namespace ConfigurationThemeSwitcher.Options
 
 		[Category("Themes")]
 		[DisplayName("Fallback/default theme")]
-		[Description("Theme display name or ID to restore for unmapped configurations. Leave blank to use the theme captured when the package loaded.")]
+		[Description("Theme to restore for unmapped configurations. Leave blank to use the theme captured when the package loaded.")]
+		[TypeConverter(typeof(ThemeSelectionConverter))]
 		public string FallbackThemeId { get; set; }
 
 		[Category("Themes")]
 		[DisplayName("Debugging theme")]
-		[Description("Theme display name or ID to apply while the Visual Studio debugger is running or paused. Leave blank to use the Debug mapping, then the fallback/default theme.")]
+		[Description("Theme to apply while the Visual Studio debugger is running or paused. Leave blank to use the Debug mapping, then the fallback/default theme.")]
+		[TypeConverter(typeof(ThemeSelectionConverter))]
 		public string DebuggingThemeId { get; set; }
 
 		[Category("Themes")]
 		[DisplayName("Configuration-to-theme mappings")]
-		[Description("One mapping per line, for example Debug=Dark or Release=Juicy Red. Use the editor button to choose themes by display name.")]
+		[Description("Use the editor button to map configurations to themes selected from the available theme list.")]
 		[Editor(typeof(ThemeMappingsEditor), typeof(UITypeEditor))]
 		public string ConfigurationThemeMappings { get; set; }
 

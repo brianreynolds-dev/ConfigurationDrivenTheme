@@ -10,11 +10,11 @@ Configuration Theme Switcher is a Visual Studio 2026 VSIX extension that changes
 4. In the experimental instance, open a solution with multiple configurations.
 5. Open **Tools > Options > Configuration Theme Switcher > General**.
 
-The VSIX manifest targets Visual Studio 2026 (`[18.0,19.0)`) and amd64.
+The VSIX manifest targets Visual Studio 2026 (`[17.0,)`) and amd64.
 
 ## Usage
 
-Mappings are configured one per line:
+Mappings are configured from **Tools > Options > Configuration Theme Switcher > General** by opening the mapping editor and choosing themes from the Theme dropdown:
 
 ```text
 Debug=Dark
@@ -22,7 +22,7 @@ Release=Light
 Benchmark=Blue
 ```
 
-The right side is shown as a discovered theme display name, such as `Dark`, `Light`, or a custom theme name. Existing GUID-based mappings are converted back to display names when the options page loads. Matching is case-insensitive. Exact configuration names are checked first, then normalized names such as `Debug|Any CPU` -> `Debug`.
+Stored mappings still use the same `Configuration=Theme` text format internally. Existing GUID-based mappings are converted back to display names when the options page loads, and unknown legacy theme names are preserved in the dropdown so they are not lost. Matching is case-insensitive. Exact configuration names are checked first, then normalized names such as `Debug|Any CPU` -> `Debug`.
 
 When Visual Studio is actively debugging, debugger run mode and break mode use this precedence:
 
@@ -86,7 +86,7 @@ If configuration changes are missed:
 1. Launch the Visual Studio experimental instance.
 2. Open a solution with Debug and Release configurations.
 3. Go to **Tools > Options > Configuration Theme Switcher > General**.
-4. Map `Debug` to `Dark`.
+4. Open the mapping editor and map `Debug` to `Dark`.
 5. Map `Release` to `Light`.
 6. Switch Debug -> Release and confirm the active theme changes.
 7. Switch Release -> Debug and confirm the active theme changes.

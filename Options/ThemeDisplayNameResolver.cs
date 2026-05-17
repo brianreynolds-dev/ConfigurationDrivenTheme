@@ -67,6 +67,12 @@ namespace ConfigurationThemeSwitcher.Options
 			return theme == null ? requested : theme.DisplayName;
 		}
 
+		public static IReadOnlyList<string> GetThemeDisplayNames(string currentValue, bool includeBlank)
+		{
+			ThreadHelper.ThrowIfNotOnUIThread();
+			return ThemeSelectionValues.BuildDisplayNames(GetThemes(), ToDisplayName(currentValue), includeBlank);
+		}
+
 		public static string NormalizeMappingsForDisplay(string mappingText)
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();

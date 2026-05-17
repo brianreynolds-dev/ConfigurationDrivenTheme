@@ -2,6 +2,7 @@
 
 ## 1.0.2
 - Added a monitor for the debugger state, so theme changes apply while the Visual Studio debugger is running or paused.
+- Added dropdown-based theme selection for fallback, debugging, and configuration mapping settings.
 
 ## 1.0.1
 - Added a monitor for the active Visual Studio instance, so theme changes apply immediately when the user switches between multiple open instances with different active solutions and configurations.
